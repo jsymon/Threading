@@ -14,7 +14,8 @@ namespace Threading
             ThreadSimple();
             ThreadParameter();
             ThreadCommon();
-            AsyncSimple();
+            AsyncWait();
+            AsyncAwait();
             Console.WriteLine("\nPress any key to exit.");
             Console.ReadKey();
         }
@@ -45,19 +46,31 @@ namespace Threading
             thread.Join();
         }
 
-        private static void AsyncSimple()
+        private static void AsyncWait()
         {
-            var task = AsyncMethod();
+            var task = AsyncMethod(1);
             Console.WriteLine("AsyncSimple caller");
             task.Wait();
+            Console.WriteLine(task.Result);
         }
 
-        private static async Task<string> AsyncMethod()
+        /// <summary>
+        /// This is not very nice - fully asynchronous yet returns void so is uncontrollable!
+        /// </summary>
+        private static async void AsyncAwait()
         {
-            Console.WriteLine("AsyncSimple start");
-            await Task.Delay(2000);
-            Console.WriteLine("AsyncSimple end");
-            return "AsyncMethod Return";
+            var task = await AsyncMethod(2);
+            Console.WriteLine("AsyncSimple caller 2");
+            Console.WriteLine(task);
+        }
+
+        private static async Task<string> AsyncMethod(int instance)
+        {
+            Console.WriteLine("AsyncSimple start " + instance);
+            await Task.Delay(1000);
+            //horrible syntax!
+            await Task.Run(new Func<Task>(() => { return Task.Delay(1000); }));
+            return "AsyncSimple end " + instance;
         }
     }
 }
